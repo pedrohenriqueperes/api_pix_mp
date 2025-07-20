@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamento PIX</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen py-8">
+    <div class="max-w-2xl mx-auto px-4">
+        <!-- Card de Planos -->
+        <div class="bg-white rounded-lg shadow-md mb-6 p-6">
+            <h2 class="text-xl font-semibold mb-4">Escolha um plano</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button onclick="generatePayment(1.0, 'Plano 1')" class="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                    <div class="text-center">
+                        <div class="font-medium">Plano 1</div>
+                        <div class="text-sm text-gray-500">R$ 1,00</div>
+                    </div>
+                </button>
+                <button onclick="generatePayment(2.0, 'Plano 2')" class="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                    <div class="text-center">
+                        <div class="font-medium">Plano 2</div>
+                        <div class="text-sm text-gray-500">R$ 2,00</div>
+                    </div>
+                </button>
+                <button onclick="generatePayment(3.0, 'Plano 3')" class="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                    <div class="text-center">
+                        <div class="font-medium">Plano 3</div>
+                        <div class="text-sm text-gray-500">R$ 3,00</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mensagem de Erro -->
+        <div id="errorAlert" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
+            <strong class="font-bold">Erro! </strong>
+            <span id="errorMessage" class="block sm:inline"></span>
+        </div>
+
+        <!-- Card do Código PIX -->
+        <div id="pixCard" class="hidden bg-white rounded-lg shadow-md mb-6 p-6">
+            <h2 class="text-xl font-semibold mb-4">Código PIX gerado</h2>
+            
+            <!-- QR Code -->
+            <div class="flex flex-col md:flex-row gap-6 mb-4">
+                <div class="flex-1">
+                    <h3 class="text-lg font-medium mb-2">QR Code</h3>
+                    <div class="flex justify-center bg-white p-4 border rounded-lg">
+                        <img id="qrCodeImage" src="" alt="QR Code PIX" class="max-w-full h-auto" style="max-width: 200px;">
+                    </div>
+                    <p class="text-sm text-gray-600 text-center mt-2">Escaneie com seu banco ou app de pagamento</p>
+                </div>
+                
+                <div class="flex-1">
+                    <h3 class="text-lg font-medium mb-2">Código PIX</h3>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <code id="pixCode" class="text-sm break-all"></code>
+                    </div>
+                    <p class="text-sm text-gray-600">Ou copie e cole este código no seu banco</p>
+                </div>
+            </div>
+            
+            <div class="flex gap-2">
+                <button onclick="copyToClipboard()" class="px-4 py-2 border rounded-lg hover:bg-gray-50 transition-colors">
+                    📋 Copiar código
+                </button>
+                <button onclick="verifyPayment()" id="verifyButton" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                    🔍 Verificar pagamento
+                </button>
+            </div>
+        </div>
+
+        <!-- Status do Pagamento -->
+        <div id="statusCard" class="hidden bg-white rounded-lg shadow-md mb-6 p-6">
+            <h2 class="text-xl font-semibold mb-4">Status do Pagamento</h2>
+            <p id="paymentStatus" class="text-gray-700"></p>
+        </div>
+    </div>
+
+    <script>
+        let currentTransactionId = '';
+
+        async function generatePayment(price, description) {
+            try {
+                const response = await fetch('/generate-payment/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        price: price,
+                        description: description
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro ao gerar pagamento');
+                }
+
+                const data = await response.json();
+                currentTransactionId = data.transaction_id;
+                
+                // Exibir código PIX
+                document.getElementById('pixCode').textContent = data.clipboard;
+                
+                // Exibir QR Code
+                const qrCodeImage = document.getElementById('qrCodeImage');
+                qrCodeImage.src = data.qrcode;
+                qrCodeImage.style.display = 'block';
+                
+                document.getElementById('pixCard').classList.remove('hidden');
+                document.getElementById('errorAlert').classList.add('hidden');
+                document.getElementById('statusCard').classList.add('hidden');
+            } catch (error) {
+                showError('Erro ao gerar pagamento. Tente novamente.');
+                console.error('Erro:', error);
+            }
+        }
+
+        async function verifyPayment() {
+            if (!currentTransactionId) return;
+
+            const button = document.getElementById('verifyButton');
+            button.disabled = true;
+            button.textContent = 'Verificando...';
+
+            try {
+                const response = await fetch('/verify-payment/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        transaction_id: currentTransactionId
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro ao verificar pagamento');
+                }
+
+                const data = await response.json();
+                const statusCard = document.getElementById('statusCard');
+                const statusText = document.getElementById('paymentStatus');
+                
+                statusCard.classList.remove('hidden');
+                statusText.textContent = data.status === 'approved' 
+                    ? 'Pagamento aprovado!' 
+                    : `Status: ${data.status_detail}`;
+            } catch (error) {
+                showError('Erro ao verificar pagamento');
+                console.error('Erro:', error);
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Verificar pagamento';
+            }
+        }
+
+        async function copyToClipboard() {
+            const pixCode = document.getElementById('pixCode').textContent;
+            try {
+                await navigator.clipboard.writeText(pixCode);
+                alert('Código copiado para a área de transferência!');
+            } catch (err) {
+                console.error('Erro ao copiar:', err);
+                alert('Erro ao copiar o código');
+            }
+        }
+
+        function showError(message) {
+            const errorAlert = document.getElementById('errorAlert');
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorAlert.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
