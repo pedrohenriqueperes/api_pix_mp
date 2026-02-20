@@ -1,124 +1,124 @@
-# Sistema de Pagamento PIX com Django e Mercado Pago
+# PIX Payment System with Django and Mercado Pago
 
-Este é um projeto Django que implementa um sistema de pagamento PIX integrado com a API do Mercado Pago. O sistema permite gerar códigos PIX para pagamento e verificar o status das transações.
+This is a Django project that implements a PIX payment system integrated with the Mercado Pago API. The system allows generating PIX payment codes and verifying transaction status.
 
-## Funcionalidades
+## Features
 
-- Geração de códigos PIX para pagamento
-- Verificação de status de pagamento em tempo real
-- Webhook para atualizações automáticas de status
-- Interface web responsiva
-- Persistência de transações no banco de dados
-- Suporte a múltiplos planos de pagamento
+- PIX payment code generation
+- Real-time payment status verification
+- Webhook for automatic status updates
+- Responsive web interface
+- Transaction persistence in database
+- Support for multiple payment plans
 
-## Requisitos
+## Requirements
 
 - Python 3.x
 - Django 5.x
 - mercadopago
 - python-dotenv
 
-## Instalação
+## Installation
 
-1. Clone o repositório:
+1. Clone the repository:
 ```bash
 git clone https://github.com/pedrohenriqueperes/django-mercadopago-pix-.git
 ```
 
-2. Crie um ambiente virtual e ative-o:
+2. Create and activate a virtual environment:
 ```bash
 python -m venv .venv
 source .venv/bin/activate  # Linux/Mac
 .venv\Scripts\activate     # Windows
 ```
 
-3. Instale as dependências:
+3. Install dependencies:
 ```bash
 pip install django mercadopago python-dotenv
 ```
 
-4. Crie um arquivo `.env` na raiz do projeto com suas credenciais do Mercado Pago:
+4. Create a `.env` file in the project root with your Mercado Pago credentials:
 ```
-MERCADO_PAGO_PUBLIC_KEY=SEU_PUBLIC_KEY_AQUI
-MERCADO_PAGO_ACCESS_TOKEN=SEU_ACCESS_TOKEN_AQUI
+MERCADO_PAGO_PUBLIC_KEY=YOUR_PUBLIC_KEY_HERE
+MERCADO_PAGO_ACCESS_TOKEN=YOUR_ACCESS_TOKEN_HERE
 ```
 
-5. Execute as migrações:
+5. Run migrations:
 ```bash
 python manage.py migrate
 ```
 
-6. Inicie o servidor:
+6. Start the server:
 ```bash
 python manage.py runserver
 ```
 
-## Configuração do Webhook (Produção)
+## Webhook Configuration (Production)
 
-Para receber atualizações automáticas do status dos pagamentos:
+To receive automatic payment status updates:
 
-1. Configure uma URL pública (ex: usando ngrok para testes)
-2. Adicione a URL do webhook no painel do Mercado Pago
-3. Adicione a URL ao ALLOWED_HOSTS do Django
+1. Configure a public URL (e.g., using ngrok for testing)
+2. Add the webhook URL in the Mercado Pago dashboard
+3. Add the URL to Django's ALLOWED_HOSTS
 
-## Estrutura do Projeto
+## Project Structure
 
 ```
 pix_payment/
-    ├── manage.py
-    ├── .env
-    ├── pix_payment/
-    │   ├── settings.py
-    │   ├── urls.py
-    │   └── wsgi.py
-    └── payments/
-        ├── models.py
-        ├── services.py
-        ├── urls.py
-        ├── views.py
-        └── templates/
-            └── payments/
-                └── index.html
+├── manage.py
+├── .env
+├── pix_payment/
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+└── payments/
+    ├── models.py
+    ├── services.py
+    ├── urls.py
+    ├── views.py
+    └── templates/
+        └── payments/
+            └── index.html
 ```
 
-## Uso
+## Usage
 
-1. Acesse a aplicação em `http://localhost:8000`
-2. Selecione um plano de pagamento
-3. Copie o código PIX gerado
-4. Efetue o pagamento usando qualquer aplicativo bancário
-5. Verifique o status do pagamento usando o botão "Verificar pagamento"
+1. Access the application at `http://localhost:8000`
+2. Select a payment plan
+3. Copy the generated PIX code
+4. Make the payment using any banking app
+5. Verify payment status using the "Verify Payment" button
 
-## Customização
+## Customization
 
-Para modificar os valores dos planos, edite o arquivo `payments/templates/payments/index.html`:
+To modify payment plan values, edit the `payments/templates/payments/index.html` file:
 
 ```html
-<button onclick="generatePayment(50.0, 'Plano 1')">
-    <!-- Altere os valores conforme necessário -->
+<button onclick="generatePayment(50.0, 'Plan 1')">
+    <!-- Change values as needed -->
 </button>
 ```
 
-## Ambiente de Produção
+## Production Environment
 
-Para usar em produção:
+For production use:
 
-1. Use credenciais de produção do Mercado Pago (APP_USR-)
-2. Configure ALLOWED_HOSTS apropriadamente
+1. Use production Mercado Pago credentials (APP_USR-)
+2. Configure ALLOWED_HOSTS appropriately
 3. Use HTTPS
-4. Configure um servidor web adequado (ex: Nginx + Gunicorn)
+4. Set up a proper web server (e.g., Nginx + Gunicorn)
 
-## Contribuindo
+## Contributing
 
-Pull requests são bem-vindos. Para mudanças maiores, abra uma issue primeiro para discutir o que você gostaria de mudar.
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-## Licença
+## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
 
-## Suporte
+## Support
 
-Se você encontrar algum problema ou tiver dúvidas, abra uma issue no repositório.
+If you encounter any problems or have questions, please open an issue in the repository.
 
 ---
-Desenvolvido por [Pedro Peres]
+Developed by [Pedro Peres]
